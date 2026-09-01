@@ -95,18 +95,21 @@ function VaultPage() {
             value={subject}
             onChange={setSubject}
             label={t("vault.subject")}
+            allLabel={t("vault.allSubject")}
             options={SUBJECTS}
           />
           <FilterSelect
             value={difficulty}
             onChange={setDifficulty}
             label={t("vault.difficulty")}
+            allLabel={t("vault.allDifficulty")}
             options={DIFFICULTIES}
           />
           <FilterSelect
             value={mastery}
             onChange={setMastery}
             label={t("vault.status")}
+            allLabel={t("vault.allStatus")}
             options={["Unresolved", "Mastered"]}
           />
         </CardContent>
@@ -188,21 +191,23 @@ function FilterSelect({
   value,
   onChange,
   label,
+  allLabel,
   options,
 }: {
   value: string;
   onChange: (v: string) => void;
   label: string;
+  allLabel: string;
   options: readonly string[];
 }) {
-  const { t, term } = useI18n();
+  const { term } = useI18n();
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger>
         <SelectValue placeholder={label} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">{t("vault.all", { label: label.toLowerCase() })}</SelectItem>
+        <SelectItem value="all">{allLabel}</SelectItem>
         {options.map((o) => (
           <SelectItem key={o} value={o}>
             {term(o)}
