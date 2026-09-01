@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { badges, leaderboard } from "@/lib/quiz-data";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/leaderboard")({
   head: () => ({
@@ -35,17 +36,18 @@ export const Route = createFileRoute("/leaderboard")({
 });
 
 function LeaderboardPage() {
+  const { t, badgeText } = useI18n();
   return (
     <AppShell>
       <TopHeader />
 
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <div className="min-w-0">
-          <h2 className="truncate text-xl font-bold">Weekly leaderboard</h2>
-          <p className="truncate text-sm text-muted-foreground">Resets Sunday at midnight</p>
+          <h2 className="truncate text-xl font-bold">{t("lb.title")}</h2>
+          <p className="truncate text-sm text-muted-foreground">{t("lb.resets")}</p>
         </div>
         <Badge className="gradient-flame shrink-0 text-accent-foreground">
-          <Trophy className="mr-1 h-3 w-3" /> Season 4
+          <Trophy className="mr-1 h-3 w-3" /> {t("lb.season")}
         </Badge>
       </div>
 
@@ -55,10 +57,10 @@ function LeaderboardPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">#</TableHead>
-                <TableHead>Student</TableHead>
-                <TableHead className="text-right">XP</TableHead>
-                <TableHead className="hidden text-right sm:table-cell">Resolved</TableHead>
-                <TableHead className="hidden text-right sm:table-cell">Streak</TableHead>
+                <TableHead>{t("lb.student")}</TableHead>
+                <TableHead className="text-right">{t("lb.xp")}</TableHead>
+                <TableHead className="hidden text-right sm:table-cell">{t("lb.resolved")}</TableHead>
+                <TableHead className="hidden text-right sm:table-cell">{t("lb.streak")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -80,7 +82,7 @@ function LeaderboardPage() {
                       </Avatar>
                       <span className="truncate text-sm font-medium">
                         {r.name}
-                        {r.isYou && <span className="ml-2 text-xs text-primary">You</span>}
+                        {r.isYou && <span className="ml-2 text-xs text-primary">{t("lb.you")}</span>}
                       </span>
                     </div>
                   </TableCell>
@@ -105,38 +107,43 @@ function LeaderboardPage() {
 
       <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="text-base">Achievement badges</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Earned by resolving mistakes, not by grinding new questions.
-          </p>
+          <CardTitle className="text-base">{t("lb.badges")}</CardTitle>
+          <p className="text-sm text-muted-foreground">{t("lb.badgesSub")}</p>
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {badges.map((b) => (
-            <div
-              key={b.id}
-              className={`rounded-2xl border p-4 ${
-                b.earned ? "border-accent/40 bg-accent/10" : "border-border bg-surface/60 opacity-80"
-              }`}
-            >
-              <div className="flex min-w-0 items-center gap-3">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-background/60 text-xl">
-                  {b.icon}
-                </span>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-bold">{b.name}</p>
-                  <p className="truncate text-xs text-muted-foreground">{b.description}</p>
+          {badges.map((b) => {
+            const text = badgeText(b.id, b.name, b.description);
+            return (
+              <div
+                key={b.id}
+                className={`rounded-2xl border p-4 ${
+                  b.earned
+                    ? "border-accent/40 bg-accent/10"
+                    : "border-border bg-surface/60 opacity-80"
+                }`}
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-background/60 text-xl">
+                    {b.icon}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold">{text.name}</p>
+                    <p className="truncate text-xs text-muted-foreground">{text.description}</p>
+                  </div>
                 </div>
+                {b.earned ? (
+                  <Badge className="mt-3 bg-success/15 text-success">{t("lb.unlocked")}</Badge>
+                ) : (
+                  <div className="mt-3 space-y-1">
+                    <Progress value={b.progress} className="h-1.5" />
+                    <p className="text-xs text-muted-foreground">
+                      {t("lb.complete", { n: b.progress })}
+                    </p>
+                  </div>
+                )}
               </div>
-              {b.earned ? (
-                <Badge className="mt-3 bg-success/15 text-success">Unlocked</Badge>
-              ) : (
-                <div className="mt-3 space-y-1">
-                  <Progress value={b.progress} className="h-1.5" />
-                  <p className="text-xs text-muted-foreground">{b.progress}% complete</p>
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </CardContent>
       </Card>
     </AppShell>

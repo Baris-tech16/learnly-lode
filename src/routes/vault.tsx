@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { DIFFICULTIES, SUBJECTS } from "@/lib/quiz-data";
 import { useQuiz } from "@/lib/quiz-store";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/vault")({
   head: () => ({
@@ -38,20 +39,26 @@ export const Route = createFileRoute("/vault")({
 
 function VaultPage() {
   const { mistakes, toggleMastery } = useQuiz();
+  const { t, term, localizeMistake } = useI18n();
   const navigate = useNavigate();
   const [subject, setSubject] = useState("all");
   const [difficulty, setDifficulty] = useState("all");
   const [mastery, setMastery] = useState("all");
   const [query, setQuery] = useState("");
 
-  const filtered = mistakes.filter(
-    (m) =>
-      (subject === "all" || m.subject === subject) &&
-      (difficulty === "all" || m.difficulty === difficulty) &&
-      (mastery === "all" || m.mastery === mastery) &&
-      (query.trim() === "" ||
-        `${m.question} ${m.topic} ${m.notes}`.toLowerCase().includes(query.toLowerCase())),
-  );
+  const filtered = mistakes
+    .filter(
+      (m) =>
+        (subject === "all" || m.subject === subject) &&
+        (difficulty === "all" || m.difficulty === difficulty) &&
+        (mastery === "all" || m.mastery === mastery),
+    )
+    .map(localizeMistake)
+    .filter(
+      (m) =>
+        query.trim() === "" ||
+        `${m.question} ${m.topic} ${m.notes}`.toLowerCase().includes(query.toLowerCase()),
+    );
 
   return (
     <AppShell>
@@ -59,15 +66,15 @@ function VaultPage() {
 
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
         <div className="min-w-0">
-          <h2 className="truncate text-xl font-bold">Mistake Vault</h2>
+          <h2 className="truncate text-xl font-bold">{t("vault.title")}</h2>
           <p className="truncate text-sm text-muted-foreground">
-            {filtered.length} of {mistakes.length} questions
+            {t("vault.count", { a: filtered.length, b: mistakes.length })}
           </p>
         </div>
         <AddMistakeDialog
           trigger={
             <Button className="shrink-0">
-              <Plus className="mr-1.5 h-4 w-4" /> Add new
+              <Plus className="mr-1.5 h-4 w-4" /> {t("vault.addNew")}
             </Button>
           }
         />
@@ -79,22 +86,27 @@ function VaultPage() {
             <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               className="pl-9"
-              placeholder="Search questions…"
+              placeholder={t("vault.search")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
-          <FilterSelect value={subject} onChange={setSubject} label="Subject" options={SUBJECTS} />
+          <FilterSelect
+            value={subject}
+            onChange={setSubject}
+            label={t("vault.subject")}
+            options={SUBJECTS}
+          />
           <FilterSelect
             value={difficulty}
             onChange={setDifficulty}
-            label="Difficulty"
+            label={t("vault.difficulty")}
             options={DIFFICULTIES}
           />
           <FilterSelect
             value={mastery}
             onChange={setMastery}
-            label="Status"
+            label={t("vault.status")}
             options={["Unresolved", "Mastered"]}
           />
         </CardContent>
@@ -103,7 +115,7 @@ function VaultPage() {
       {filtered.length === 0 ? (
         <Card className="glass-card">
           <CardContent className="py-14 text-center text-sm text-muted-foreground">
-            No mistakes match these filters. Try clearing them.
+            {t("vault.empty")}
           </CardContent>
         </Card>
       ) : (
@@ -112,7 +124,7 @@ function VaultPage() {
             <Card key={m.id} className="glass-card transition-colors hover:border-primary/40">
               <CardHeader className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge className="bg-primary/15 text-primary">{m.subject}</Badge>
+                  <Badge className="bg-primary/15 text-primary">{term(m.subject)}</Badge>
                   <Badge variant="outline">{m.topic}</Badge>
                   <Badge
                     variant="outline"
@@ -124,11 +136,11 @@ function VaultPage() {
                           : "border-success/40 text-success"
                     }
                   >
-                    {m.difficulty}
+                    {term(m.difficulty)}
                   </Badge>
                   {m.mastery === "Mastered" && (
                     <Badge className="bg-success/15 text-success">
-                      <CheckCircle2 className="mr-1 h-3 w-3" /> Mastered
+                      <CheckCircle2 className="mr-1 h-3 w-3" /> {t("vault.masteredBadge")}
                     </Badge>
                   )}
                 </div>
@@ -137,30 +149,28 @@ function VaultPage() {
               <CardContent className="space-y-4">
                 {m.notes && (
                   <p className="rounded-xl border border-border bg-surface/70 p-3 text-xs text-muted-foreground">
-                    <span className="font-semibold text-foreground">Your note: </span>
+                    <span className="font-semibold text-foreground">{t("vault.yourNote")}</span>
                     {m.notes}
                   </p>
                 )}
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-                  <span>
-                    {m.attempts} attempts · added {m.addedAt}
-                  </span>
+                  <span>{t("vault.meta", { n: m.attempts, d: m.addedAt })}</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
                     onClick={() => navigate({ to: "/practice", search: { id: m.id } })}
                   >
-                    Practice
+                    {t("vault.practice")}
                   </Button>
                   <Button size="sm" variant="secondary" onClick={() => toggleMastery(m.id)}>
                     {m.mastery === "Mastered" ? (
                       <>
-                        <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> Reopen
+                        <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> {t("vault.reopen")}
                       </>
                     ) : (
                       <>
-                        <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Mark mastered
+                        <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> {t("vault.markMastered")}
                       </>
                     )}
                   </Button>
@@ -185,16 +195,17 @@ function FilterSelect({
   label: string;
   options: readonly string[];
 }) {
+  const { t, term } = useI18n();
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger>
         <SelectValue placeholder={label} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">All {label.toLowerCase()}</SelectItem>
+        <SelectItem value="all">{t("vault.all", { label: label.toLowerCase() })}</SelectItem>
         {options.map((o) => (
           <SelectItem key={o} value={o}>
-            {o}
+            {term(o)}
           </SelectItem>
         ))}
       </SelectContent>
