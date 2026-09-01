@@ -24,9 +24,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DIFFICULTIES, SUBJECTS, type Difficulty, type Subject } from "@/lib/quiz-data";
 import { useQuiz } from "@/lib/quiz-store";
+import { useI18n } from "@/lib/i18n";
 
 export function AddMistakeDialog({ trigger }: { trigger: ReactNode }) {
   const { addMistake } = useQuiz();
+  const { t, term } = useI18n();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState("text");
   const [subject, setSubject] = useState<Subject>("Math");
@@ -46,23 +48,23 @@ export function AddMistakeDialog({ trigger }: { trigger: ReactNode }) {
 
   function submit() {
     if (mode === "text" && question.trim().length < 5) {
-      toast.error("Write the question first (at least a few words).");
+      toast.error(t("add.errQuestion"));
       return;
     }
     if (mode === "image" && !imageName) {
-      toast.error("Pick an image of the question.");
+      toast.error(t("add.errImage"));
       return;
     }
     addMistake({
       subject,
       difficulty,
       topic: topic.trim(),
-      question: question.trim() || "Question captured from image",
+      question: question.trim() || t("add.fromImage"),
       notes: notes.trim(),
       imageName,
     });
-    toast.success("Added to your Mistake Vault", {
-      description: "The Socratic Coach prepared hints for it.",
+    toast.success(t("add.saved"), {
+      description: t("add.savedDesc"),
     });
     reset();
     setOpen(false);
@@ -79,19 +81,17 @@ export function AddMistakeDialog({ trigger }: { trigger: ReactNode }) {
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add a wrong question</DialogTitle>
-          <DialogDescription>
-            Capture the mistake while it is fresh — and say why you missed it.
-          </DialogDescription>
+          <DialogTitle>{t("add.title")}</DialogTitle>
+          <DialogDescription>{t("add.desc")}</DialogDescription>
         </DialogHeader>
 
         <Tabs value={mode} onValueChange={setMode}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="text">
-              <Type className="mr-1.5 h-4 w-4" /> Type it
+              <Type className="mr-1.5 h-4 w-4" /> {t("add.typeIt")}
             </TabsTrigger>
             <TabsTrigger value="image">
-              <ImagePlus className="mr-1.5 h-4 w-4" /> Upload image
+              <ImagePlus className="mr-1.5 h-4 w-4" /> {t("add.uploadImage")}
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -99,25 +99,25 @@ export function AddMistakeDialog({ trigger }: { trigger: ReactNode }) {
         <div className="space-y-4">
           {mode === "text" ? (
             <div className="space-y-2">
-              <Label htmlFor="q">Question</Label>
+              <Label htmlFor="q">{t("add.question")}</Label>
               <Textarea
                 id="q"
                 rows={4}
-                placeholder="Paste or type the question you got wrong…"
+                placeholder={t("add.questionPlaceholder")}
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
               />
             </div>
           ) : (
             <div className="space-y-2">
-              <Label htmlFor="img">Question image</Label>
+              <Label htmlFor="img">{t("add.imageLabel")}</Label>
               <label
                 htmlFor="img"
                 className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-surface/60 px-4 py-8 text-center transition-colors hover:border-primary/60"
               >
                 <ImagePlus className="h-6 w-6 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">
-                  {imageName ?? "Tap to select a photo of the question"}
+                  {imageName ?? t("add.imagePlaceholder")}
                 </span>
               </label>
               <Input
@@ -132,7 +132,7 @@ export function AddMistakeDialog({ trigger }: { trigger: ReactNode }) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>Subject</Label>
+              <Label>{t("add.subject")}</Label>
               <Select value={subject} onValueChange={(v) => setSubject(v as Subject)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -140,14 +140,14 @@ export function AddMistakeDialog({ trigger }: { trigger: ReactNode }) {
                 <SelectContent>
                   {SUBJECTS.map((s) => (
                     <SelectItem key={s} value={s}>
-                      {s}
+                      {term(s)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Difficulty</Label>
+              <Label>{t("add.difficulty")}</Label>
               <Select value={difficulty} onValueChange={(v) => setDifficulty(v as Difficulty)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -155,7 +155,7 @@ export function AddMistakeDialog({ trigger }: { trigger: ReactNode }) {
                 <SelectContent>
                   {DIFFICULTIES.map((d) => (
                     <SelectItem key={d} value={d}>
-                      {d}
+                      {term(d)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -164,21 +164,21 @@ export function AddMistakeDialog({ trigger }: { trigger: ReactNode }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="topic">Topic</Label>
+            <Label htmlFor="topic">{t("add.topic")}</Label>
             <Input
               id="topic"
-              placeholder="e.g. Kinematics"
+              placeholder={t("add.topicPlaceholder")}
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Why did you get it wrong?</Label>
+            <Label htmlFor="notes">{t("add.why")}</Label>
             <Textarea
               id="notes"
               rows={3}
-              placeholder="e.g. I forgot to check the domain of the logarithm."
+              placeholder={t("add.whyPlaceholder")}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />
@@ -187,9 +187,9 @@ export function AddMistakeDialog({ trigger }: { trigger: ReactNode }) {
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>
-            Cancel
+            {t("add.cancel")}
           </Button>
-          <Button onClick={submit}>Save to Vault</Button>
+          <Button onClick={submit}>{t("add.save")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
