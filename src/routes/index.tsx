@@ -25,6 +25,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { weaknessStats, weeklyActivity } from "@/lib/quiz-data";
 import { useQuiz } from "@/lib/quiz-store";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -47,9 +48,12 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const { mistakes, awardXp } = useQuiz();
+  const { t, term } = useI18n();
   const navigate = useNavigate();
   const unresolved = mistakes.filter((m) => m.mastery === "Unresolved").length;
   const mastered = mistakes.length - unresolved;
+
+  const chartData = weeklyActivity.map((d) => ({ ...d, day: term(d.day) }));
 
   return (
     <AppShell>
@@ -57,21 +61,21 @@ function Dashboard() {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
-          label="Open mistakes"
+          label={t("dash.openMistakes")}
           value={String(unresolved)}
-          hint="waiting in your vault"
+          hint={t("dash.openMistakesHint")}
           icon={<Target className="h-4 w-4 text-primary" />}
         />
         <StatCard
-          label="Mastered"
+          label={t("dash.mastered")}
           value={String(mastered)}
-          hint="resolved for good"
+          hint={t("dash.masteredHint")}
           icon={<Sparkles className="h-4 w-4 text-success" />}
         />
         <StatCard
-          label="Weekly XP"
+          label={t("dash.weeklyXp")}
           value="+480"
-          hint="rank #4 this week"
+          hint={t("dash.weeklyXpHint")}
           icon={<TrendingDown className="h-4 w-4 rotate-180 text-accent" />}
         />
       </div>
@@ -79,17 +83,15 @@ function Dashboard() {
       <div className="grid gap-4 lg:grid-cols-5">
         <Card className="glass-card lg:col-span-3">
           <CardHeader>
-            <CardTitle className="text-base">Weakness analytics</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Accuracy by topic — the lowest ones feed your daily review.
-            </p>
+            <CardTitle className="text-base">{t("dash.weakness")}</CardTitle>
+            <p className="text-sm text-muted-foreground">{t("dash.weaknessSub")}</p>
           </CardHeader>
           <CardContent className="space-y-4">
             {weaknessStats.map((s) => (
               <div key={s.topic} className="space-y-1.5">
                 <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
                   <p className="truncate text-sm font-medium">
-                    {s.subject} — {s.topic}
+                    {term(s.subject)} — {term(s.topic)}
                   </p>
                   <span
                     className={`shrink-0 text-sm font-bold ${
@@ -103,7 +105,9 @@ function Dashboard() {
                   value={s.accuracy}
                   className={s.accuracy < 60 ? "h-2 bg-destructive/20" : "h-2 bg-success/20"}
                 />
-                <p className="text-xs text-muted-foreground">{s.attempts} attempts logged</p>
+                <p className="text-xs text-muted-foreground">
+                  {s.attempts} {t("dash.attempts")}
+                </p>
               </div>
             ))}
           </CardContent>
@@ -111,12 +115,12 @@ function Dashboard() {
 
         <Card className="glass-card lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-base">Questions resolved</CardTitle>
-            <p className="text-sm text-muted-foreground">Last 7 days</p>
+            <CardTitle className="text-base">{t("dash.resolvedChart")}</CardTitle>
+            <p className="text-sm text-muted-foreground">{t("dash.last7")}</p>
           </CardHeader>
           <CardContent className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklyActivity}>
+              <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                 <XAxis dataKey="day" stroke="var(--muted-foreground)" fontSize={12} />
                 <YAxis stroke="var(--muted-foreground)" fontSize={12} width={24} />
@@ -138,14 +142,14 @@ function Dashboard() {
 
       <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="text-base">Quick actions</CardTitle>
+          <CardTitle className="text-base">{t("dash.quickActions")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-3">
           <AddMistakeDialog
             trigger={
               <Button className="h-auto justify-start gap-3 py-4">
                 <Plus className="h-5 w-5 shrink-0" />
-                <span className="text-left text-sm font-semibold">Upload wrong question</span>
+                <span className="text-left text-sm font-semibold">{t("dash.upload")}</span>
               </Button>
             }
           />
@@ -154,43 +158,40 @@ function Dashboard() {
             className="h-auto justify-start gap-3 py-4"
             onClick={() => {
               awardXp(20);
-              toast.success("Daily review started (+20 XP)", {
-                description: "Beginning with your weakest topic: Kinematics.",
+              toast.success(t("dash.reviewToast"), {
+                description: t("dash.reviewToastDesc"),
               });
               navigate({ to: "/practice", search: { id: undefined } });
             }}
           >
             <CalendarCheck className="h-5 w-5 shrink-0 text-accent" />
-            <span className="text-left text-sm font-semibold">Start daily review</span>
+            <span className="text-left text-sm font-semibold">{t("dash.startReview")}</span>
           </Button>
           <Button
             variant="outline"
             className="h-auto justify-start gap-3 py-4"
             onClick={() => {
-              toast("Practice quiz generated", {
-                description: "8 questions mixed from your weakest 3 topics.",
+              toast(t("dash.quizToast"), {
+                description: t("dash.quizToastDesc"),
               });
               navigate({ to: "/practice", search: { id: undefined } });
             }}
           >
             <BrainCircuit className="h-5 w-5 shrink-0 text-primary" />
-            <span className="text-left text-sm font-semibold">Generate practice quiz</span>
+            <span className="text-left text-sm font-semibold">{t("dash.generateQuiz")}</span>
           </Button>
         </CardContent>
       </Card>
 
       <Card className="glass-card">
         <CardHeader className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-          <CardTitle className="truncate text-base">Today's focus</CardTitle>
-          <Badge className="shrink-0 bg-accent/15 text-accent">Socratic mode</Badge>
+          <CardTitle className="truncate text-base">{t("dash.todayFocus")}</CardTitle>
+          <Badge className="shrink-0 bg-accent/15 text-accent">{t("dash.socraticMode")}</Badge>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>
-            You have {unresolved} unresolved mistakes. Physics — Kinematics is your weakest topic at
-            40% accuracy.
-          </p>
+          <p>{t("dash.focusLine", { n: unresolved })}</p>
           <Button variant="link" className="px-0" onClick={() => navigate({ to: "/vault" })}>
-            Open the Mistake Vault →
+            {t("dash.openVault")}
           </Button>
         </CardContent>
       </Card>

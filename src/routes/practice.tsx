@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { generateSimilarQuestion, type Mistake } from "@/lib/quiz-data";
 import { useQuiz } from "@/lib/quiz-store";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/practice")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -41,6 +42,7 @@ export const Route = createFileRoute("/practice")({
 function PracticePage() {
   const { id } = Route.useSearch();
   const { mistakes, awardXp, toggleMastery, registerAttempt } = useQuiz();
+  const { t, term, localizeMistake } = useI18n();
 
   const queue = useMemo(() => {
     const list = mistakes.filter((m) => m.mastery === "Unresolved");
@@ -58,8 +60,8 @@ function PracticePage() {
   const [selected, setSelected] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
-  const base = queue[index % Math.max(queue.length, 1)];
-  const current = variant ?? base;
+  const rawBase = queue[index % Math.max(queue.length, 1)];
+  const rawCurrent = variant ?? rawBase;
 
   function resetQuestion() {
     setHintLevel(0);
@@ -67,19 +69,21 @@ function PracticePage() {
     setSubmitted(false);
   }
 
-  if (!base || !current) {
+  if (!rawBase || !rawCurrent) {
     return (
       <AppShell>
         <TopHeader />
         <Card className="glass-card">
           <CardContent className="py-16 text-center text-sm text-muted-foreground">
-            Your vault is empty — add a wrong question to start practicing.
+            {t("practice.emptyVault")}
           </CardContent>
         </Card>
       </AppShell>
     );
   }
 
+  const base = localizeMistake(rawBase);
+  const current = localizeMistake(rawCurrent);
   const correct = selected === current.correctIndex;
 
   return (
@@ -88,22 +92,22 @@ function PracticePage() {
 
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <div className="min-w-0">
-          <h2 className="truncate text-xl font-bold">Socratic practice</h2>
+          <h2 className="truncate text-xl font-bold">{t("practice.title")}</h2>
           <p className="truncate text-sm text-muted-foreground">
-            Question {index + 1} of {queue.length} in your review queue
+            {t("practice.progress", { i: index + 1, n: queue.length })}
           </p>
         </div>
         <Badge className="shrink-0 bg-primary/15 text-primary">
-          {variant ? "AI variation" : "From vault"}
+          {variant ? t("practice.variation") : t("practice.fromVault")}
         </Badge>
       </div>
 
       <Card className="glass-card">
         <CardHeader className="space-y-3">
           <div className="flex flex-wrap gap-2">
-            <Badge className="bg-primary/15 text-primary">{current.subject}</Badge>
+            <Badge className="bg-primary/15 text-primary">{term(current.subject)}</Badge>
             <Badge variant="outline">{current.topic}</Badge>
-            <Badge variant="outline">{current.difficulty}</Badge>
+            <Badge variant="outline">{term(current.difficulty)}</Badge>
           </div>
           <CardTitle className="text-base leading-relaxed">{current.question}</CardTitle>
         </CardHeader>
@@ -147,7 +151,9 @@ function PracticePage() {
                 >
                   <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
                   <p>
-                    <span className="font-semibold text-accent">Hint {i + 1}: </span>
+                    <span className="font-semibold text-accent">
+                      {t("practice.hint")} {i + 1}:{" "}
+                    </span>
                     {h}
                   </p>
                 </div>
@@ -160,30 +166,30 @@ function PracticePage() {
               variant="secondary"
               onClick={() => {
                 if (hintLevel >= current.hints.length) {
-                  toast("No more hints — try reasoning it through now.");
+                  toast(t("practice.noMoreHints"));
                   return;
                 }
                 setHintLevel((h) => h + 1);
-                toast("Socratic hint unlocked", {
-                  description: "Think it through before asking for the next one.",
+                toast(t("practice.hintUnlocked"), {
+                  description: t("practice.hintUnlockedDesc"),
                 });
               }}
             >
               <Lightbulb className="mr-1.5 h-4 w-4 text-accent" />
-              Get Socratic hint ({hintLevel}/{current.hints.length})
+              {t("practice.getHint")} ({hintLevel}/{current.hints.length})
             </Button>
             <Button
               variant="outline"
               onClick={() => {
-                setVariant(generateSimilarQuestion(base, (index % 3) + 1));
+                setVariant(generateSimilarQuestion(rawBase, (index % 3) + 1));
                 resetQuestion();
-                toast.success("Similar question generated", {
-                  description: "Same concept, different numbers and scenario.",
+                toast.success(t("practice.similarToast"), {
+                  description: t("practice.similarToastDesc"),
                 });
               }}
             >
               <Sparkles className="mr-1.5 h-4 w-4 text-primary" />
-              Generate similar question
+              {t("practice.generateSimilar")}
             </Button>
           </div>
 
@@ -193,17 +199,17 @@ function PracticePage() {
               disabled={selected === null}
               onClick={() => {
                 setSubmitted(true);
-                registerAttempt(base.id);
+                registerAttempt(rawBase.id);
                 if (selected === current.correctIndex) {
                   const gain = Math.max(10, 40 - hintLevel * 10);
                   awardXp(gain);
-                  toast.success(`Correct! +${gain} XP`);
+                  toast.success(t("practice.correctToast", { n: gain }));
                 } else {
-                  toast.error("Not quite — read the detailed solution below.");
+                  toast.error(t("practice.wrongToast"));
                 }
               }}
             >
-              Submit answer
+              {t("practice.submit")}
             </Button>
           ) : (
             <div className="space-y-4">
@@ -215,12 +221,12 @@ function PracticePage() {
                 }`}
               >
                 <p className={`text-sm font-bold ${correct ? "text-success" : "text-destructive"}`}>
-                  {correct ? "Correct answer" : "Incorrect answer"}
+                  {correct ? t("practice.correct") : t("practice.incorrect")}
                 </p>
                 <p className="mt-2 text-sm text-foreground/90">{current.solution}</p>
                 {base.notes && (
                   <p className="mt-3 text-xs text-muted-foreground">
-                    Your original note: {base.notes}
+                    {t("practice.originalNote")} {base.notes}
                   </p>
                 )}
               </div>
@@ -232,27 +238,28 @@ function PracticePage() {
                     resetQuestion();
                   }}
                 >
-                  Next question <ArrowRight className="ml-1.5 h-4 w-4" />
+                  {t("practice.next")} <ArrowRight className="ml-1.5 h-4 w-4" />
                 </Button>
                 <Button
                   variant="secondary"
                   onClick={() => {
-                    setVariant(generateSimilarQuestion(base, ((index + 1) % 3) + 1));
+                    setVariant(generateSimilarQuestion(rawBase, ((index + 1) % 3) + 1));
                     resetQuestion();
                   }}
                 >
-                  <Shuffle className="mr-1.5 h-4 w-4" /> Try a variation
+                  <Shuffle className="mr-1.5 h-4 w-4" /> {t("practice.tryVariation")}
                 </Button>
-                {base.mastery === "Unresolved" && (
+                {rawBase.mastery === "Unresolved" && (
                   <Button
                     variant="outline"
                     onClick={() => {
-                      toggleMastery(base.id);
+                      toggleMastery(rawBase.id);
                       awardXp(50);
-                      toast.success("Marked as mastered (+50 XP)");
+                      toast.success(t("practice.masteredToast"));
                     }}
                   >
-                    <CheckCircle2 className="mr-1.5 h-4 w-4 text-success" /> Mark mastered
+                    <CheckCircle2 className="mr-1.5 h-4 w-4 text-success" />{" "}
+                    {t("vault.markMastered")}
                   </Button>
                 )}
               </div>
