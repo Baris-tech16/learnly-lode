@@ -1,8 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { CheckCircle2, Plus, RotateCcw, Search } from "lucide-react";
+import { CheckCircle2, Plus, RotateCcw, ScanLine, Search } from "lucide-react";
 import { AppShell, TopHeader } from "@/components/AppShell";
 import { AddMistakeDialog } from "@/components/AddMistakeDialog";
+import { OcrCaptureDialog } from "@/components/OcrCaptureDialog";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -71,13 +73,23 @@ function VaultPage() {
             {t("vault.count", { a: filtered.length, b: mistakes.length })}
           </p>
         </div>
-        <AddMistakeDialog
-          trigger={
-            <Button className="shrink-0">
-              <Plus className="mr-1.5 h-4 w-4" /> {t("vault.addNew")}
-            </Button>
-          }
-        />
+        <div className="flex shrink-0 gap-2">
+          <OcrCaptureDialog
+            trigger={
+              <Button variant="secondary" className="shrink-0">
+                <ScanLine className="mr-1.5 h-4 w-4" /> {t("ocr.trigger")}
+              </Button>
+            }
+          />
+          <AddMistakeDialog
+            trigger={
+              <Button className="shrink-0">
+                <Plus className="mr-1.5 h-4 w-4" /> {t("vault.addNew")}
+              </Button>
+            }
+          />
+        </div>
+
       </div>
 
       <Card className="glass-card">

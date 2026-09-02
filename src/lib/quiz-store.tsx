@@ -8,7 +8,10 @@ type NewMistake = {
   question: string;
   notes: string;
   imageName?: string | undefined;
+  choices?: string[] | undefined;
+  correctIndex?: number | undefined;
 };
+
 
 type Store = {
   mistakes: Mistake[];
@@ -41,8 +44,9 @@ export function QuizProvider({ children }: { children: ReactNode }) {
         difficulty: m.difficulty,
         mastery: "Unresolved",
         question: m.imageName ? `${m.question} (attached: ${m.imageName})` : m.question,
-        choices: ["Option A", "Option B", "Option C", "Option D"],
-        correctIndex: 0,
+        choices: m.choices?.length ? m.choices : ["Option A", "Option B", "Option C", "Option D"],
+        correctIndex: m.correctIndex ?? 0,
+
         hints: [
           "Restate the question in your own words — what exactly is being asked?",
           "Which formula or concept connects the given values to the unknown?",
