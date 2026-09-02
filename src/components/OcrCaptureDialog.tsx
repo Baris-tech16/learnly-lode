@@ -184,6 +184,7 @@ export function OcrCaptureDialog({ trigger }: { trigger: ReactNode }) {
 
   useEffect(() => {
     if (!dragging) return;
+    const d = dragging;
     function move(e: PointerEvent) {
       const box = stageRef.current?.getBoundingClientRect();
       if (!box) return;
@@ -192,22 +193,22 @@ export function OcrCaptureDialog({ trigger }: { trigger: ReactNode }) {
       const s = dragStart.current.crop;
       const min = 12;
       let next = { ...s };
-      if (dragging === "move") {
+      if (d === "move") {
         next.x = clamp(s.x + dx, 0, 100 - s.w);
         next.y = clamp(s.y + dy, 0, 100 - s.h);
       } else {
-        if (dragging.includes("w")) {
+        if (d.includes("w")) {
           const x = clamp(s.x + dx, 0, s.x + s.w - min);
           next.w = s.w + (s.x - x);
           next.x = x;
         }
-        if (dragging.includes("e")) next.w = clamp(s.w + dx, min, 100 - s.x);
-        if (dragging.startsWith("n")) {
+        if (d.includes("e")) next.w = clamp(s.w + dx, min, 100 - s.x);
+        if (d.startsWith("n")) {
           const y = clamp(s.y + dy, 0, s.y + s.h - min);
           next.h = s.h + (s.y - y);
           next.y = y;
         }
-        if (dragging.startsWith("s")) next.h = clamp(s.h + dy, min, 100 - s.y);
+        if (d.startsWith("s")) next.h = clamp(s.h + dy, min, 100 - s.y);
       }
       setCrop(next);
     }
