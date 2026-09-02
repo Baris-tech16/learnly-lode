@@ -614,8 +614,20 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
+const FALLBACK: I18n = {
+  lang: "en",
+  setLang: () => {},
+  t: (key, vars) => {
+    let s: string = en[key] ?? String(key);
+    if (vars) for (const [k, v] of Object.entries(vars)) s = s.replaceAll(`{${k}}`, String(v));
+    return s;
+  },
+  term: (value) => value,
+  localizeMistake: (m) => m,
+  badgeText: (_id, name, description) => ({ name, description }),
+};
+
 export function useI18n() {
-  const ctx = useContext(Ctx);
-  if (!ctx) throw new Error("useI18n must be used within LanguageProvider");
-  return ctx;
+  return useContext(Ctx) ?? FALLBACK;
 }
+
