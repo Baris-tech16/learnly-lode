@@ -1,5 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { BrainCircuit, Flame, LayoutDashboard, Library, Trophy, Zap } from "lucide-react";
+import {
+  BrainCircuit,
+  Flame,
+  LayoutDashboard,
+  Library,
+  Trophy,
+  UserRound,
+  Zap,
+} from "lucide-react";
 import type { ReactNode } from "react";
 import { useQuiz } from "@/lib/quiz-store";
 import { useI18n } from "@/lib/i18n";
@@ -12,6 +20,7 @@ const NAV = [
   { to: "/vault", labelKey: "nav.vault", icon: Library },
   { to: "/practice", labelKey: "nav.practice", icon: BrainCircuit },
   { to: "/leaderboard", labelKey: "nav.ranks", icon: Trophy },
+  { to: "/profile", labelKey: "nav.profile", icon: UserRound },
 ] as const;
 
 function SideNav() {
@@ -57,7 +66,7 @@ function SideNav() {
 function BottomNav() {
   const { t } = useI18n();
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-border bg-sidebar/95 backdrop-blur md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-sidebar/95 backdrop-blur md:hidden">
       {NAV.map(({ to, labelKey, icon: Icon }) => (
         <Link
           key={to}

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as PracticeRouteImport } from './routes/practice'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as VaultRouteImport } from './routes/vault'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const PracticeRoute = PracticeRouteImport.update({
   path: '/practice',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VaultRoute = VaultRouteImport.update({
   id: '/vault',
   path: '/vault',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/leaderboard': typeof LeaderboardRoute
   '/practice': typeof PracticeRoute
+  '/profile': typeof ProfileRoute
   '/vault': typeof VaultRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/leaderboard': typeof LeaderboardRoute
   '/practice': typeof PracticeRoute
+  '/profile': typeof ProfileRoute
   '/vault': typeof VaultRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/leaderboard': typeof LeaderboardRoute
   '/practice': typeof PracticeRoute
+  '/profile': typeof ProfileRoute
   '/vault': typeof VaultRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/leaderboard' | '/practice' | '/vault'
+  fullPaths: '/' | '/leaderboard' | '/practice' | '/profile' | '/vault'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/leaderboard' | '/practice' | '/vault'
-  id: '__root__' | '/' | '/leaderboard' | '/practice' | '/vault'
+  to: '/' | '/leaderboard' | '/practice' | '/profile' | '/vault'
+  id: '__root__' | '/' | '/leaderboard' | '/practice' | '/profile' | '/vault'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LeaderboardRoute: typeof LeaderboardRoute
   PracticeRoute: typeof PracticeRoute
+  ProfileRoute: typeof ProfileRoute
   VaultRoute: typeof VaultRoute
 }
 
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PracticeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vault': {
       id: '/vault'
       path: '/vault'
@@ -106,6 +123,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LeaderboardRoute: LeaderboardRoute,
   PracticeRoute: PracticeRoute,
+  ProfileRoute: ProfileRoute,
   VaultRoute: VaultRoute,
 }
 export const routeTree = rootRouteImport
