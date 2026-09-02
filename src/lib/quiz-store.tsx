@@ -8,7 +8,10 @@ type NewMistake = {
   question: string;
   notes: string;
   imageName?: string | undefined;
+  choices?: string[] | undefined;
+  correctIndex?: number | undefined;
 };
+
 
 type Store = {
   mistakes: Mistake[];
