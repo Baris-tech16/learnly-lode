@@ -1,8 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { CheckCircle2, Plus, RotateCcw, Search } from "lucide-react";
+import { CheckCircle2, Plus, RotateCcw, ScanLine, Search } from "lucide-react";
 import { AppShell, TopHeader } from "@/components/AppShell";
 import { AddMistakeDialog } from "@/components/AddMistakeDialog";
+import { OcrCaptureDialog } from "@/components/OcrCaptureDialog";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
