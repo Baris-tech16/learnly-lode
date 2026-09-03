@@ -16,6 +16,8 @@ export type Mistake = {
   notes: string;
   addedAt: string;
   attempts: number;
+  /** ISO date (YYYY-MM-DD) of the last practice session, or null if never practiced. */
+  lastPracticedAt?: string | null;
 };
 
 export const SUBJECTS: Subject[] = ["Math", "Physics", "Chemistry", "Biology", "History"];
