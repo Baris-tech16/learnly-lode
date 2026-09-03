@@ -19,6 +19,7 @@ import {
 } from "recharts";
 import { AppShell, TopHeader } from "@/components/AppShell";
 import { AddMistakeDialog } from "@/components/AddMistakeDialog";
+import { ReviewAlerts } from "@/components/ReviewAlerts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -58,6 +59,8 @@ function Dashboard() {
   return (
     <AppShell>
       <TopHeader />
+
+      <ReviewAlerts />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard

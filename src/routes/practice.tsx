@@ -20,6 +20,7 @@ import { useI18n } from "@/lib/i18n";
 export const Route = createFileRoute("/practice")({
   validateSearch: (search: Record<string, unknown>) => ({
     id: typeof search['id'] === "string" ? (search['id'] as string) : undefined,
+    mode: search['mode'] === "smart" ? ("smart" as const) : undefined,
   }),
   head: () => ({
     meta: [
@@ -40,19 +41,22 @@ export const Route = createFileRoute("/practice")({
 });
 
 function PracticePage() {
-  const { id } = Route.useSearch();
-  const { mistakes, awardXp, toggleMastery, registerAttempt } = useQuiz();
+  const { id, mode } = Route.useSearch();
+  const { mistakes, dueIds, awardXp, toggleMastery, registerAttempt } = useQuiz();
   const { t, term, localizeMistake } = useI18n();
 
   const queue = useMemo(() => {
-    const list = mistakes.filter((m) => m.mastery === "Unresolved");
+    const list =
+      mode === "smart"
+        ? mistakes.filter((m) => dueIds.includes(m.id))
+        : mistakes.filter((m) => m.mastery === "Unresolved");
     const pool = list.length ? list : mistakes;
     const start = Math.max(
       0,
       pool.findIndex((m) => m.id === id),
     );
     return [...pool.slice(start), ...pool.slice(0, start)];
-  }, [mistakes, id]);
+  }, [mistakes, dueIds, mode, id]);
 
   const [index, setIndex] = useState(0);
   const [variant, setVariant] = useState<Mistake | null>(null);
@@ -98,7 +102,11 @@ function PracticePage() {
           </p>
         </div>
         <Badge className="shrink-0 bg-primary/15 text-primary">
-          {variant ? t("practice.variation") : t("practice.fromVault")}
+          {variant
+            ? t("practice.variation")
+            : mode === "smart"
+              ? t("srs.smartMode")
+              : t("practice.fromVault")}
         </Badge>
       </div>
 
