@@ -215,6 +215,23 @@ const en = {
     "This removes your vault, XP and streak history. This action cannot be undone.",
   "profile.deleteQueued": "Account deletion requested",
   "profile.deleteQueuedDesc": "Your data will be erased within 30 days.",
+
+  "srs.needsFirst": "Needs First Practice",
+  "srs.weekDue": "1-Week Review Due",
+  "srs.pendingBody":
+    "🚨 Hey! Unsolved questions are waiting in your vault. Practice now to keep your streak! 🔥",
+  "srs.pendingCount": "{n} question(s) never practiced",
+  "srs.decayTitle": "Memory Decay Alert",
+  "srs.decayBody":
+    "🧠 Memory Decay Alert: It's time to lock in questions you solved 1 week ago! Review quiz is ready 🎯",
+  "srs.decayCount": "{n} question(s) solved 7+ days ago",
+  "srs.startSmart": "Start Smart Review Quiz",
+  "srs.smartMode": "Smart review",
+  "srs.smartEmpty": "Nothing is due right now. Great job — come back tomorrow!",
+  "srs.allClear": "✅ No reviews due. Your memory curve is under control!",
+  "srs.reviewDue": "Review due",
+  "srs.smartToast": "Smart review started",
+  "srs.smartToastDesc": "{n} question(s) queued by the forgetting curve.",
 };
 
 
