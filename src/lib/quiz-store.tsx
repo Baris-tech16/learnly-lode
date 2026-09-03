@@ -20,6 +20,9 @@ type Store = {
   streak: number;
   xpIntoLevel: number;
   xpForLevel: number;
+  pendingFirstPractice: Mistake[];
+  weekReviewDue: Mistake[];
+  dueIds: string[];
   addMistake: (m: NewMistake) => void;
   toggleMastery: (id: string) => void;
   awardXp: (amount: number) => void;
@@ -29,9 +32,50 @@ type Store = {
 const QuizContext = createContext<Store | null>(null);
 
 const XP_PER_LEVEL = 400;
+const DAY = 86_400_000;
+
+export const REVIEW_INTERVAL_DAYS = 7;
+
+function iso(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function daysAgo(n: number) {
+  return iso(new Date(Date.now() - n * DAY));
+}
+
+export function needsFirstPractice(m: Mistake) {
+  return m.attempts === 0 || !m.lastPracticedAt;
+}
+
+export function isWeekReviewDue(m: Mistake) {
+  if (needsFirstPractice(m)) return false;
+  const last = new Date(`${m.lastPracticedAt}T00:00:00Z`).getTime();
+  if (Number.isNaN(last)) return false;
+  return Date.now() - last >= REVIEW_INTERVAL_DAYS * DAY;
+}
+
+/** Deterministic demo history: days since the last practice, null = never practiced. */
+const SEED_HISTORY: Record<string, number | null> = {
+  m1: 7,
+  m2: 9,
+  m3: 2,
+  m4: 12,
+  m5: 3,
+  m6: 8,
+  m7: 1,
+  m8: null,
+};
+
+const seededMistakes: Mistake[] = initialMistakes.map((m) => {
+  const days = m.id in SEED_HISTORY ? SEED_HISTORY[m.id]! : 1;
+  return days == null
+    ? { ...m, attempts: 0, lastPracticedAt: null }
+    : { ...m, lastPracticedAt: daysAgo(days) };
+});
 
 export function QuizProvider({ children }: { children: ReactNode }) {
-  const [mistakes, setMistakes] = useState<Mistake[]>(initialMistakes);
+  const [mistakes, setMistakes] = useState<Mistake[]>(seededMistakes);
   const [xp, setXp] = useState(1250);
   const [streak] = useState(7);
 
