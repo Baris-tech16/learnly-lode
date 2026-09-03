@@ -164,7 +164,7 @@ function Dashboard() {
               toast.success(t("dash.reviewToast"), {
                 description: t("dash.reviewToastDesc"),
               });
-              navigate({ to: "/practice", search: { id: undefined } });
+              navigate({ to: "/practice", search: { id: undefined, mode: undefined } });
             }}
           >
             <CalendarCheck className="h-5 w-5 shrink-0 text-accent" />
@@ -177,7 +177,7 @@ function Dashboard() {
               toast(t("dash.quizToast"), {
                 description: t("dash.quizToastDesc"),
               });
-              navigate({ to: "/practice", search: { id: undefined } });
+              navigate({ to: "/practice", search: { id: undefined, mode: undefined } });
             }}
           >
             <BrainCircuit className="h-5 w-5 shrink-0 text-primary" />

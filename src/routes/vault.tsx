@@ -187,7 +187,7 @@ function VaultPage() {
                 <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
-                    onClick={() => navigate({ to: "/practice", search: { id: m.id } })}
+                    onClick={() => navigate({ to: "/practice", search: { id: m.id, mode: undefined } })}
                   >
                     {t("vault.practice")}
                   </Button>
