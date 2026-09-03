@@ -68,8 +68,8 @@ const SEED_HISTORY: Record<string, number | null> = {
 };
 
 const seededMistakes: Mistake[] = initialMistakes.map((m) => {
-  const days = m.id in SEED_HISTORY ? SEED_HISTORY[m.id]! : 1;
-  return days == null
+  const days: number | null = m.id in SEED_HISTORY ? (SEED_HISTORY[m.id] ?? null) : 1;
+  return days === null
     ? { ...m, attempts: 0, lastPracticedAt: null }
     : { ...m, lastPracticedAt: daysAgo(days) };
 });
