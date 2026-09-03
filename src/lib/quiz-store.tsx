@@ -20,6 +20,9 @@ type Store = {
   streak: number;
   xpIntoLevel: number;
   xpForLevel: number;
+  pendingFirstPractice: Mistake[];
+  weekReviewDue: Mistake[];
+  dueIds: string[];
   addMistake: (m: NewMistake) => void;
   toggleMastery: (id: string) => void;
   awardXp: (amount: number) => void;
@@ -29,9 +32,50 @@ type Store = {
 const QuizContext = createContext<Store | null>(null);
 
 const XP_PER_LEVEL = 400;
+const DAY = 86_400_000;
+
+export const REVIEW_INTERVAL_DAYS = 7;
+
+function iso(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function daysAgo(n: number) {
+  return iso(new Date(Date.now() - n * DAY));
+}
+
+export function needsFirstPractice(m: Mistake) {
+  return m.attempts === 0 || !m.lastPracticedAt;
+}
+
+export function isWeekReviewDue(m: Mistake) {
+  if (needsFirstPractice(m)) return false;
+  const last = new Date(`${m.lastPracticedAt}T00:00:00Z`).getTime();
+  if (Number.isNaN(last)) return false;
+  return Date.now() - last >= REVIEW_INTERVAL_DAYS * DAY;
+}
+
+/** Deterministic demo history: days since the last practice, null = never practiced. */
+const SEED_HISTORY: Record<string, number | null> = {
+  m1: 7,
+  m2: 9,
+  m3: 2,
+  m4: 12,
+  m5: 3,
+  m6: 8,
+  m7: 1,
+  m8: null,
+};
+
+const seededMistakes: Mistake[] = initialMistakes.map((m) => {
+  const days: number | null = m.id in SEED_HISTORY ? (SEED_HISTORY[m.id] ?? null) : 1;
+  return days === null
+    ? { ...m, attempts: 0, lastPracticedAt: null }
+    : { ...m, lastPracticedAt: daysAgo(days) };
+});
 
 export function QuizProvider({ children }: { children: ReactNode }) {
-  const [mistakes, setMistakes] = useState<Mistake[]>(initialMistakes);
+  const [mistakes, setMistakes] = useState<Mistake[]>(seededMistakes);
   const [xp, setXp] = useState(1250);
   const [streak] = useState(7);
 
@@ -57,6 +101,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
         notes: m.notes,
         addedAt: new Date().toISOString().slice(0, 10),
         attempts: 0,
+        lastPracticedAt: null,
       },
       ...prev,
     ]);
@@ -71,10 +116,24 @@ export function QuizProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const registerAttempt = useCallback((id: string) => {
-    setMistakes((prev) => prev.map((m) => (m.id === id ? { ...m, attempts: m.attempts + 1 } : m)));
+    setMistakes((prev) =>
+      prev.map((m) =>
+        m.id === id ? { ...m, attempts: m.attempts + 1, lastPracticedAt: iso(new Date()) } : m,
+      ),
+    );
   }, []);
 
   const awardXp = useCallback((amount: number) => setXp((v) => v + amount), []);
+
+  const pendingFirstPractice = useMemo(
+    () => mistakes.filter(needsFirstPractice),
+    [mistakes],
+  );
+  const weekReviewDue = useMemo(() => mistakes.filter(isWeekReviewDue), [mistakes]);
+  const dueIds = useMemo(
+    () => [...pendingFirstPractice, ...weekReviewDue].map((m) => m.id),
+    [pendingFirstPractice, weekReviewDue],
+  );
 
   const value = useMemo<Store>(
     () => ({
@@ -84,12 +143,26 @@ export function QuizProvider({ children }: { children: ReactNode }) {
       streak,
       xpIntoLevel: xp % XP_PER_LEVEL,
       xpForLevel: XP_PER_LEVEL,
+      pendingFirstPractice,
+      weekReviewDue,
+      dueIds,
       addMistake,
       toggleMastery,
       awardXp,
       registerAttempt,
     }),
-    [mistakes, xp, streak, addMistake, toggleMastery, awardXp, registerAttempt],
+    [
+      mistakes,
+      xp,
+      streak,
+      pendingFirstPractice,
+      weekReviewDue,
+      dueIds,
+      addMistake,
+      toggleMastery,
+      awardXp,
+      registerAttempt,
+    ],
   );
 
   return <QuizContext.Provider value={value}>{children}</QuizContext.Provider>;

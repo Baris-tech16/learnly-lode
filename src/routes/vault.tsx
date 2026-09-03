@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { CheckCircle2, Plus, RotateCcw, ScanLine, Search } from "lucide-react";
+import { AlarmClock, BrainCircuit, CheckCircle2, Plus, RotateCcw, ScanLine, Search } from "lucide-react";
 import { AppShell, TopHeader } from "@/components/AppShell";
 import { AddMistakeDialog } from "@/components/AddMistakeDialog";
 import { OcrCaptureDialog } from "@/components/OcrCaptureDialog";
+import { ReviewAlerts } from "@/components/ReviewAlerts";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DIFFICULTIES, SUBJECTS } from "@/lib/quiz-data";
-import { useQuiz } from "@/lib/quiz-store";
+import { isWeekReviewDue, needsFirstPractice, useQuiz } from "@/lib/quiz-store";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/vault")({
@@ -65,6 +66,8 @@ function VaultPage() {
   return (
     <AppShell>
       <TopHeader />
+
+      <ReviewAlerts showAllClear />
 
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
         <div className="min-w-0">
@@ -153,6 +156,16 @@ function VaultPage() {
                   >
                     {term(m.difficulty)}
                   </Badge>
+                  {needsFirstPractice(m) && (
+                    <Badge className="bg-destructive/15 text-destructive">
+                      <AlarmClock className="mr-1 h-3 w-3" /> {t("srs.needsFirst")}
+                    </Badge>
+                  )}
+                  {isWeekReviewDue(m) && (
+                    <Badge className="bg-accent/15 text-accent">
+                      <BrainCircuit className="mr-1 h-3 w-3" /> {t("srs.weekDue")}
+                    </Badge>
+                  )}
                   {m.mastery === "Mastered" && (
                     <Badge className="bg-success/15 text-success">
                       <CheckCircle2 className="mr-1 h-3 w-3" /> {t("vault.masteredBadge")}
@@ -174,7 +187,7 @@ function VaultPage() {
                 <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
-                    onClick={() => navigate({ to: "/practice", search: { id: m.id } })}
+                    onClick={() => navigate({ to: "/practice", search: { id: m.id, mode: undefined } })}
                   >
                     {t("vault.practice")}
                   </Button>

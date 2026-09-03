@@ -215,6 +215,23 @@ const en = {
     "This removes your vault, XP and streak history. This action cannot be undone.",
   "profile.deleteQueued": "Account deletion requested",
   "profile.deleteQueuedDesc": "Your data will be erased within 30 days.",
+
+  "srs.needsFirst": "Needs First Practice",
+  "srs.weekDue": "1-Week Review Due",
+  "srs.pendingBody":
+    "🚨 Hey! Unsolved questions are waiting in your vault. Practice now to keep your streak! 🔥",
+  "srs.pendingCount": "{n} question(s) never practiced",
+  "srs.decayTitle": "Memory Decay Alert",
+  "srs.decayBody":
+    "🧠 Memory Decay Alert: It's time to lock in questions you solved 1 week ago! Review quiz is ready 🎯",
+  "srs.decayCount": "{n} question(s) solved 7+ days ago",
+  "srs.startSmart": "Start Smart Review Quiz",
+  "srs.smartMode": "Smart review",
+  "srs.smartEmpty": "Nothing is due right now. Great job — come back tomorrow!",
+  "srs.allClear": "✅ No reviews due. Your memory curve is under control!",
+  "srs.reviewDue": "Review due",
+  "srs.smartToast": "Smart review started",
+  "srs.smartToastDesc": "{n} question(s) queued by the forgetting curve.",
 };
 
 
@@ -418,6 +435,23 @@ const tr: Record<Key, string> = {
     "Bu işlem defterini, XP'ni ve seri geçmişini siler. Geri alınamaz.",
   "profile.deleteQueued": "Hesap silme talebi alındı",
   "profile.deleteQueuedDesc": "Verilerin 30 gün içinde silinecek.",
+
+  "srs.needsFirst": "İlk Tekrar Bekliyor",
+  "srs.weekDue": "1 Haftalık Unutma Eğrisi Tekrarı",
+  "srs.pendingBody":
+    "🚨 Hey! Defterinde henüz çözülmemiş sorular bekliyor. Hemen göz at ve serini koru! 🔥",
+  "srs.pendingCount": "{n} soru hiç çözülmedi",
+  "srs.decayTitle": "Unutma Eğrisi Uyarısı",
+  "srs.decayBody":
+    "🧠 Unutma Eğrisi Uyarısı: 1 hafta önce çözdüğün soruları hafızana kazıma zamanı geldi! Tekrar testi hazır 🎯",
+  "srs.decayCount": "{n} soru 7+ gün önce çözüldü",
+  "srs.startSmart": "Akıllı Tekrar Başlat",
+  "srs.smartMode": "Akıllı tekrar",
+  "srs.smartEmpty": "Şu an tekrar bekleyen soru yok. Harikasın — yarın tekrar uğra!",
+  "srs.allClear": "✅ Tekrar bekleyen soru yok. Unutma eğrin kontrol altında!",
+  "srs.reviewDue": "Tekrar zamanı",
+  "srs.smartToast": "Akıllı tekrar başladı",
+  "srs.smartToastDesc": "{n} soru unutma eğrisine göre sıraya alındı.",
 };
 
 
