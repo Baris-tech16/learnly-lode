@@ -17,7 +17,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   CURRENT_USER,
@@ -186,7 +185,7 @@ function CommunityPage() {
             <span className="hidden sm:inline">· {t("chat.longPressHint")}</span>
           </div>
 
-          <ScrollArea className="h-[52vh] min-h-72 pr-2 sm:h-[58vh] [&>[data-radix-scroll-area-viewport]>div]:!block [&>[data-radix-scroll-area-viewport]>div]:w-full">
+          <div className="h-[52vh] min-h-72 overflow-y-auto pr-1 sm:h-[58vh]">
             <div className="space-y-4">
               {list.map((m) => {
                 const author = byHandle[m.handle] ?? CURRENT_USER;
@@ -278,7 +277,7 @@ function CommunityPage() {
               })}
               <div ref={feedEndRef} />
             </div>
-          </ScrollArea>
+          </div>
 
           <div className="space-y-2">
             {replyTo && (
