@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CommunityRouteImport } from './routes/community'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as PracticeRouteImport } from './routes/practice'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -18,6 +19,11 @@ import { Route as VaultRouteImport } from './routes/vault'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeaderboardRoute = LeaderboardRouteImport.update({
@@ -43,6 +49,7 @@ const VaultRoute = VaultRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/community': typeof CommunityRoute
   '/leaderboard': typeof LeaderboardRoute
   '/practice': typeof PracticeRoute
   '/profile': typeof ProfileRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/community': typeof CommunityRoute
   '/leaderboard': typeof LeaderboardRoute
   '/practice': typeof PracticeRoute
   '/profile': typeof ProfileRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/community': typeof CommunityRoute
   '/leaderboard': typeof LeaderboardRoute
   '/practice': typeof PracticeRoute
   '/profile': typeof ProfileRoute
@@ -65,14 +74,23 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/leaderboard' | '/practice' | '/profile' | '/vault'
+  fullPaths:
+    '/' | '/community' | '/leaderboard' | '/practice' | '/profile' | '/vault'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/leaderboard' | '/practice' | '/profile' | '/vault'
-  id: '__root__' | '/' | '/leaderboard' | '/practice' | '/profile' | '/vault'
+  to: '/' | '/community' | '/leaderboard' | '/practice' | '/profile' | '/vault'
+  id:
+    | '__root__'
+    | '/'
+    | '/community'
+    | '/leaderboard'
+    | '/practice'
+    | '/profile'
+    | '/vault'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CommunityRoute: typeof CommunityRoute
   LeaderboardRoute: typeof LeaderboardRoute
   PracticeRoute: typeof PracticeRoute
   ProfileRoute: typeof ProfileRoute
@@ -86,6 +104,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leaderboard': {
@@ -121,6 +146,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CommunityRoute: CommunityRoute,
   LeaderboardRoute: LeaderboardRoute,
   PracticeRoute: PracticeRoute,
   ProfileRoute: ProfileRoute,
