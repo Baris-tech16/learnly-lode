@@ -186,7 +186,7 @@ function CommunityPage() {
             <span className="hidden sm:inline">· {t("chat.longPressHint")}</span>
           </div>
 
-          <ScrollArea className="h-[52vh] min-h-72 pr-2 sm:h-[58vh]">
+          <ScrollArea className="h-[52vh] min-h-72 pr-2 sm:h-[58vh] [&>[data-radix-scroll-area-viewport]>div]:!block [&>[data-radix-scroll-area-viewport]>div]:w-full">
             <div className="space-y-4">
               {list.map((m) => {
                 const author = byHandle[m.handle] ?? CURRENT_USER;
@@ -228,7 +228,7 @@ function CommunityPage() {
                       )}
 
                       <p
-                        className={`rounded-2xl px-3 py-2 text-sm leading-relaxed ${
+                        className={`rounded-2xl px-3 py-2 text-sm leading-relaxed break-words ${
                           isMe
                             ? "bg-primary/15 text-foreground"
                             : "bg-surface/70 text-foreground"
@@ -249,7 +249,7 @@ function CommunityPage() {
                             <Badge variant="outline">{localized.topic}</Badge>
                             <Badge variant="outline">{term(localized.difficulty)}</Badge>
                           </div>
-                          <p className="mt-2 text-sm">{localized.question}</p>
+                          <p className="mt-2 text-sm break-words">{localized.question}</p>
                           <div className="mt-3 flex flex-wrap gap-2">
                             <Button
                               size="sm"
