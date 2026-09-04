@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { QuizProvider } from "../lib/quiz-store";
 import { LanguageProvider } from "../lib/i18n";
 import { Toaster } from "../components/ui/sonner";
+import { installChunkReloadGuard } from "../lib/chunk-reload";
 
 
 function NotFoundComponent() {
