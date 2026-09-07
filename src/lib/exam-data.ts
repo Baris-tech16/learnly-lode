@@ -30,7 +30,12 @@ function matchesTopic(m: Mistake, topic: string) {
  * Deterministic "AI" exam builder: picks matching vault material and expands it
  * with generated variations until the exam has EXAM_LENGTH questions.
  */
-export function buildExam(pool: Mistake[], topic: string, source: ExamSource): ExamQuestion[] {
+export function buildExam(
+  pool: Mistake[],
+  topic: string,
+  source: ExamSource,
+  localize: (m: Mistake) => Mistake = (m) => m,
+): ExamQuestion[] {
   const matched = pool.filter((m) => matchesTopic(m, topic));
   const base = (matched.length ? matched : pool).slice();
   if (!base.length) return [];
@@ -42,7 +47,7 @@ export function buildExam(pool: Mistake[], topic: string, source: ExamSource): E
     for (const m of base) {
       if (questions.length >= EXAM_LENGTH) break;
       const useVariant = source === "topic" ? true : source === "vault" ? round > 0 : round % 2 === 1;
-      const q = useVariant ? generateSimilarQuestion(m, (round % 3) + 1) : m;
+      const q = useVariant ? localize(generateSimilarQuestion(m, (round % 3) + 1)) : m;
       questions.push({
         id: `${q.id}-ex${round}`,
         subject: q.subject,
