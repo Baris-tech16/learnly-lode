@@ -147,7 +147,7 @@ function Dashboard() {
         <CardHeader>
           <CardTitle className="text-base">{t("dash.quickActions")}</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-3 sm:grid-cols-3">
+        <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <AddMistakeDialog
             trigger={
               <Button className="h-auto justify-start gap-3 py-4">
