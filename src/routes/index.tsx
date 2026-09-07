@@ -183,6 +183,15 @@ function Dashboard() {
             <BrainCircuit className="h-5 w-5 shrink-0 text-primary" />
             <span className="text-left text-sm font-semibold">{t("dash.generateQuiz")}</span>
           </Button>
+          <Button
+            variant="outline"
+            className="h-auto justify-start gap-3 py-4"
+            onClick={() => navigate({ to: "/exam" })}
+          >
+            <ClipboardCheck className="h-5 w-5 shrink-0 text-accent" />
+            <span className="text-left text-sm font-semibold">{t("exam.quickAction")}</span>
+          </Button>
+
         </CardContent>
       </Card>
 
