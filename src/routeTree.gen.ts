@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CommunityRouteImport } from './routes/community'
+import { Route as ExamRouteImport } from './routes/exam'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as PracticeRouteImport } from './routes/practice'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const CommunityRoute = CommunityRouteImport.update({
   id: '/community',
   path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExamRoute = ExamRouteImport.update({
+  id: '/exam',
+  path: '/exam',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeaderboardRoute = LeaderboardRouteImport.update({
@@ -50,6 +56,7 @@ const VaultRoute = VaultRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/community': typeof CommunityRoute
+  '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
   '/practice': typeof PracticeRoute
   '/profile': typeof ProfileRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/community': typeof CommunityRoute
+  '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
   '/practice': typeof PracticeRoute
   '/profile': typeof ProfileRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/community': typeof CommunityRoute
+  '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
   '/practice': typeof PracticeRoute
   '/profile': typeof ProfileRoute
@@ -75,13 +84,27 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/community' | '/leaderboard' | '/practice' | '/profile' | '/vault'
+    | '/'
+    | '/community'
+    | '/exam'
+    | '/leaderboard'
+    | '/practice'
+    | '/profile'
+    | '/vault'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/community' | '/leaderboard' | '/practice' | '/profile' | '/vault'
+  to:
+    | '/'
+    | '/community'
+    | '/exam'
+    | '/leaderboard'
+    | '/practice'
+    | '/profile'
+    | '/vault'
   id:
     | '__root__'
     | '/'
     | '/community'
+    | '/exam'
     | '/leaderboard'
     | '/practice'
     | '/profile'
@@ -91,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CommunityRoute: typeof CommunityRoute
+  ExamRoute: typeof ExamRoute
   LeaderboardRoute: typeof LeaderboardRoute
   PracticeRoute: typeof PracticeRoute
   ProfileRoute: typeof ProfileRoute
@@ -111,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/community'
       fullPath: '/community'
       preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/exam': {
+      id: '/exam'
+      path: '/exam'
+      fullPath: '/exam'
+      preLoaderRoute: typeof ExamRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leaderboard': {
@@ -147,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CommunityRoute: CommunityRoute,
+  ExamRoute: ExamRoute,
   LeaderboardRoute: LeaderboardRoute,
   PracticeRoute: PracticeRoute,
   ProfileRoute: ProfileRoute,

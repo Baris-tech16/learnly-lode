@@ -4,6 +4,7 @@ import {
   Flame,
   LayoutDashboard,
   Library,
+  ClipboardCheck,
   MessagesSquare,
   Trophy,
   UserRound,
@@ -20,6 +21,7 @@ const NAV = [
   { to: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
   { to: "/vault", labelKey: "nav.vault", icon: Library },
   { to: "/practice", labelKey: "nav.practice", icon: BrainCircuit },
+  { to: "/exam", labelKey: "nav.exam", icon: ClipboardCheck },
   { to: "/community", labelKey: "nav.community", icon: MessagesSquare },
   { to: "/leaderboard", labelKey: "nav.ranks", icon: Trophy },
   { to: "/profile", labelKey: "nav.profile", icon: UserRound },
@@ -68,13 +70,13 @@ function SideNav() {
 function BottomNav() {
   const { t } = useI18n();
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-border bg-sidebar/95 backdrop-blur md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-7 border-t border-border bg-sidebar/95 backdrop-blur md:hidden">
       {NAV.map(({ to, labelKey, icon: Icon }) => (
         <Link
           key={to}
           to={to}
           activeOptions={{ exact: to === "/" }}
-          className="flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium text-muted-foreground"
+          className="flex flex-col items-center gap-1 py-2.5 text-[9px] font-medium text-muted-foreground"
           activeProps={{ className: "!text-primary" }}
         >
           <Icon className="h-5 w-5" />
