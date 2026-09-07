@@ -78,6 +78,7 @@ function ExamPage() {
   const [remaining, setRemaining] = useState(0);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [savedCount, setSavedCount] = useState(0);
+  const [startedAt, setStartedAt] = useState(0);
   const finishedRef = useRef(false);
 
   const localizedPool = useMemo(() => mistakes.map(localizeMistake), [mistakes, localizeMistake]);
@@ -143,7 +144,10 @@ function ExamPage() {
     setSavedCount(0);
     setRemaining(minutes * 60);
     setPhase("generating");
-    window.setTimeout(() => setPhase("running"), 1900);
+    window.setTimeout(() => {
+      setStartedAt(Date.now());
+      setPhase("running");
+    }, 1900);
   }
 
   /* ----------------------------- SETUP ----------------------------- */
@@ -257,7 +261,7 @@ function ExamPage() {
     const blanks = answers.filter((a) => a === null).length;
     const incorrect = questions.length - correct - blanks;
     const accuracy = Math.round((correct / questions.length) * 100);
-    const used = minutes * 60 - remaining;
+    const used = startedAt ? Math.round((Date.now() - startedAt) / 1000) : minutes * 60 - remaining;
     const missed = questions
       .map((q, i) => ({ q, i }))
       .filter(({ q, i }) => answers[i] !== q.correctIndex);
