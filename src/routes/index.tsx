@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   BrainCircuit,
   CalendarCheck,
+  ClipboardCheck,
   Plus,
   Sparkles,
   Target,
@@ -147,7 +148,7 @@ function Dashboard() {
         <CardHeader>
           <CardTitle className="text-base">{t("dash.quickActions")}</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-3 sm:grid-cols-3">
+        <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <AddMistakeDialog
             trigger={
               <Button className="h-auto justify-start gap-3 py-4">
@@ -183,6 +184,15 @@ function Dashboard() {
             <BrainCircuit className="h-5 w-5 shrink-0 text-primary" />
             <span className="text-left text-sm font-semibold">{t("dash.generateQuiz")}</span>
           </Button>
+          <Button
+            variant="outline"
+            className="h-auto justify-start gap-3 py-4"
+            onClick={() => navigate({ to: "/exam" })}
+          >
+            <ClipboardCheck className="h-5 w-5 shrink-0 text-accent" />
+            <span className="text-left text-sm font-semibold">{t("exam.quickAction")}</span>
+          </Button>
+
         </CardContent>
       </Card>
 
