@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   BrainCircuit,
   CalendarCheck,
+  ClipboardCheck,
   Plus,
   Sparkles,
   Target,
