@@ -32,12 +32,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DIFFICULTIES, SUBJECTS, type Difficulty, type Subject } from "@/lib/quiz-data";
+import { aiExtractQuestion } from "@/lib/ai.functions";
 import { useQuiz } from "@/lib/quiz-store";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
+
 /* ------------------------------------------------------------------ */
-/* Simulated OCR results                                               */
+/* AI OCR extraction result                                            */
 /* ------------------------------------------------------------------ */
 
 type Extracted = {
@@ -50,69 +52,6 @@ type Extracted = {
   confidence: number;
 };
 
-const SAMPLES: Record<"en" | "tr", Extracted[]> = {
-  en: [
-    {
-      question:
-        "A ball is thrown vertically upward with an initial speed of 20 m/s. How long does it take to reach the highest point? (g = 10 m/s²)",
-      choices: ["1 s", "2 s", "2.5 s", "4 s", "5 s"],
-      subject: "Physics",
-      topic: "Kinematics",
-      difficulty: "Medium",
-      correctIndex: 1,
-      confidence: 96,
-    },
-    {
-      question: "If f(x) = 2x² − 3x + 1, what is f(−2)?",
-      choices: ["3", "9", "11", "15", "17"],
-      subject: "Math",
-      topic: "Functions",
-      difficulty: "Easy",
-      correctIndex: 3,
-      confidence: 94,
-    },
-    {
-      question:
-        "Which of the following salts produces a basic solution when dissolved in pure water?",
-      choices: ["NaCl", "NH₄Cl", "CH₃COONa", "KNO₃", "Na₂SO₄"],
-      subject: "Chemistry",
-      topic: "Acids and Bases",
-      difficulty: "Hard",
-      correctIndex: 2,
-      confidence: 91,
-    },
-  ],
-  tr: [
-    {
-      question:
-        "Bir top 20 m/s ilk hızla düşey olarak yukarı atılıyor. En yüksek noktaya çıkması kaç saniye sürer? (g = 10 m/s²)",
-      choices: ["1 s", "2 s", "2,5 s", "4 s", "5 s"],
-      subject: "Physics",
-      topic: "Kinematics",
-      difficulty: "Medium",
-      correctIndex: 1,
-      confidence: 96,
-    },
-    {
-      question: "f(x) = 2x² − 3x + 1 ise f(−2) kaçtır?",
-      choices: ["3", "9", "11", "15", "17"],
-      subject: "Math",
-      topic: "Functions",
-      difficulty: "Easy",
-      correctIndex: 3,
-      confidence: 94,
-    },
-    {
-      question: "Aşağıdaki tuzlardan hangisi saf suda çözündüğünde bazik çözelti oluşturur?",
-      choices: ["NaCl", "NH₄Cl", "CH₃COONa", "KNO₃", "Na₂SO₄"],
-      subject: "Chemistry",
-      topic: "Acids and Bases",
-      difficulty: "Hard",
-      correctIndex: 2,
-      confidence: 91,
-    },
-  ],
-};
 
 const LETTERS = ["A", "B", "C", "D", "E"];
 const DEFAULT_CROP = { x: 8, y: 8, w: 84, h: 84 };
@@ -254,22 +193,38 @@ export function OcrCaptureDialog({ trigger }: { trigger: ReactNode }) {
     return out.toDataURL("image/png");
   }
 
-  function process() {
-    setPreview(renderCrop());
+  async function process() {
+    const cropped = renderCrop();
+    setPreview(cropped);
     setStep("scanning");
     setScanStep(0);
-    const pool = SAMPLES[lang] ?? SAMPLES.en;
-    const picked = pool[Math.floor(Math.random() * pool.length)] ?? pool[0]!;
-    const timers = [1, 2, 3].map((i) => window.setTimeout(() => setScanStep(i), i * 700));
-    const done = window.setTimeout(() => {
-      setData({ ...picked, choices: [...picked.choices] });
+    const timers = [1, 2, 3].map((i) => window.setTimeout(() => setScanStep(i), i * 900));
+    try {
+      if (!cropped) throw new Error("no-image");
+      const result = await aiExtractQuestion({ data: { imageDataUrl: cropped, lang } });
+      const choices = result.choices.length ? result.choices : ["", "", "", ""];
+      setData({
+        question: result.question,
+        choices,
+        subject: (SUBJECTS as string[]).includes(result.subject)
+          ? (result.subject as Subject)
+          : "Math",
+        topic: result.topic,
+        difficulty: (DIFFICULTIES as string[]).includes(result.difficulty)
+          ? (result.difficulty as Difficulty)
+          : "Medium",
+        correctIndex: Math.min(Math.max(result.correctIndex, 0), choices.length - 1),
+        confidence: result.confidence,
+      });
       setStep("verify");
-    }, 3000);
-    return () => {
-      timers.forEach(clearTimeout);
-      clearTimeout(done);
-    };
+    } catch (err) {
+      toast.error(t("exam.ocrError"), { description: (err as Error).message });
+      setStep("crop");
+    } finally {
+      timers.forEach((id) => window.clearTimeout(id));
+    }
   }
+
 
   function save() {
     if (!data) return;
@@ -461,7 +416,7 @@ export function OcrCaptureDialog({ trigger }: { trigger: ReactNode }) {
               <Button variant="ghost" onClick={reset}>
                 {t("ocr.back")}
               </Button>
-              <Button onClick={process}>
+              <Button onClick={() => void process()}>
                 <Sparkles className="mr-1.5 h-4 w-4" /> {t("ocr.process")}
               </Button>
             </div>

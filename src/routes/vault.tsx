@@ -1,10 +1,20 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { AlarmClock, BrainCircuit, CheckCircle2, Plus, RotateCcw, ScanLine, Search } from "lucide-react";
+import {
+  AlarmClock,
+  BrainCircuit,
+  CheckCircle2,
+  Plus,
+  RotateCcw,
+  ScanLine,
+  Search,
+  Sparkles,
+} from "lucide-react";
 import { AppShell, TopHeader } from "@/components/AppShell";
 import { AddMistakeDialog } from "@/components/AddMistakeDialog";
 import { OcrCaptureDialog } from "@/components/OcrCaptureDialog";
 import { ReviewAlerts } from "@/components/ReviewAlerts";
+import { VaultExamDialog } from "@/components/VaultExamDialog";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,7 +51,7 @@ export const Route = createFileRoute("/vault")({
 });
 
 function VaultPage() {
-  const { mistakes, toggleMastery } = useQuiz();
+  const { mistakes, toggleMastery, signedIn } = useQuiz();
   const { t, term, localizeMistake } = useI18n();
   const navigate = useNavigate();
   const [subject, setSubject] = useState("all");
@@ -69,6 +79,22 @@ function VaultPage() {
 
       <ReviewAlerts showAllClear />
 
+      <Card className="glass-card border-primary/40 bg-primary/5">
+        <CardContent className="flex flex-col gap-3 pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-sm font-bold">{t("exam.vaultCta")}</p>
+            <p className="text-xs text-muted-foreground">{t("exam.vaultCtaDesc")}</p>
+          </div>
+          <VaultExamDialog
+            trigger={
+              <Button className="shrink-0">
+                <Sparkles className="mr-1.5 h-4 w-4" /> {t("exam.start")}
+              </Button>
+            }
+          />
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
         <div className="min-w-0">
           <h2 className="truncate text-xl font-bold">{t("vault.title")}</h2>
@@ -94,6 +120,18 @@ function VaultPage() {
         </div>
 
       </div>
+
+      {!signedIn && (
+        <Card className="glass-card">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 pt-6 text-sm">
+            <span className="text-muted-foreground">{t("auth.guest")}</span>
+            <Button size="sm" variant="secondary" onClick={() => navigate({ to: "/auth" })}>
+              {t("auth.signInCta")}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
 
       <Card className="glass-card">
         <CardContent className="grid gap-3 pt-6 sm:grid-cols-2 lg:grid-cols-4">

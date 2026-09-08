@@ -1,5 +1,21 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { initialMistakes, type Difficulty, type Mistake, type Subject } from "./quiz-data";
+import { useAuth } from "./auth";
+import {
+  listMistakes,
+  saveMistakes,
+  updateMistake,
+  type DbMistake,
+  type NewDbMistake,
+} from "./mistakes.functions";
 
 type NewMistake = {
   subject: Subject;
@@ -10,6 +26,9 @@ type NewMistake = {
   imageName?: string | undefined;
   choices?: string[] | undefined;
   correctIndex?: number | undefined;
+  hints?: string[] | undefined;
+  solution?: string | undefined;
+  source?: string | undefined;
 };
 
 
@@ -23,13 +42,16 @@ type Store = {
   pendingFirstPractice: Mistake[];
   weekReviewDue: Mistake[];
   dueIds: string[];
+  signedIn: boolean;
   addMistake: (m: NewMistake) => void;
+  addMistakes: (items: NewMistake[]) => Promise<void>;
   toggleMastery: (id: string) => void;
   awardXp: (amount: number) => void;
   registerAttempt: (id: string) => void;
 };
 
 const QuizContext = createContext<Store | null>(null);
+
 
 const XP_PER_LEVEL = 400;
 const DAY = 86_400_000;
@@ -74,54 +96,144 @@ const seededMistakes: Mistake[] = initialMistakes.map((m) => {
     : { ...m, lastPracticedAt: daysAgo(days) };
 });
 
+const DEFAULT_HINTS = [
+  "Restate the question in your own words — what exactly is being asked?",
+  "Which formula or concept connects the given values to the unknown?",
+  "Work through the substitution one step at a time and check your units.",
+];
+const DEFAULT_SOLUTION =
+  "Walk through your own reasoning and compare it with your note about why you got it wrong.";
+
+function fromDb(row: DbMistake): Mistake {
+  return {
+    id: row.id,
+    subject: row.subject as Subject,
+    topic: row.topic,
+    difficulty: row.difficulty as Difficulty,
+    mastery: row.mastery === "Mastered" ? "Mastered" : "Unresolved",
+    question: row.question,
+    choices: Array.isArray(row.choices) && row.choices.length ? row.choices : ["A", "B", "C", "D"],
+    correctIndex: row.correct_index ?? 0,
+    hints: Array.isArray(row.hints) && row.hints.length ? row.hints : DEFAULT_HINTS,
+    solution: row.solution || DEFAULT_SOLUTION,
+    notes: row.notes ?? "",
+    addedAt: (row.created_at ?? "").slice(0, 10),
+    attempts: row.attempts ?? 0,
+    lastPracticedAt: row.last_practiced_at ?? null,
+  };
+}
+
+function toDb(m: NewMistake): NewDbMistake {
+  return {
+    subject: m.subject,
+    topic: m.topic || "General",
+    difficulty: m.difficulty,
+    question: m.imageName ? `${m.question} (attached: ${m.imageName})` : m.question,
+    choices: m.choices?.length ? m.choices : ["Option A", "Option B", "Option C", "Option D"],
+    correctIndex: m.correctIndex ?? 0,
+    hints: m.hints?.length ? m.hints : DEFAULT_HINTS,
+    solution: m.solution || DEFAULT_SOLUTION,
+    notes: m.notes,
+    source: m.source ?? "manual",
+  };
+}
+
+function localMistake(m: NewMistake): Mistake {
+  const db = toDb(m);
+  return {
+    id: `m-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    subject: m.subject,
+    topic: db.topic,
+    difficulty: m.difficulty,
+    mastery: "Unresolved",
+    question: db.question,
+    choices: db.choices,
+    correctIndex: db.correctIndex,
+    hints: db.hints ?? DEFAULT_HINTS,
+    solution: db.solution ?? DEFAULT_SOLUTION,
+    notes: m.notes,
+    addedAt: iso(new Date()),
+    attempts: 0,
+    lastPracticedAt: null,
+  };
+}
+
 export function QuizProvider({ children }: { children: ReactNode }) {
+  const { signedIn } = useAuth();
   const [mistakes, setMistakes] = useState<Mistake[]>(seededMistakes);
   const [xp, setXp] = useState(1250);
   const [streak] = useState(7);
 
-  const addMistake = useCallback((m: NewMistake) => {
-    setMistakes((prev) => [
-      {
-        id: `m-${Date.now()}`,
-        subject: m.subject,
-        topic: m.topic || "General",
-        difficulty: m.difficulty,
-        mastery: "Unresolved",
-        question: m.imageName ? `${m.question} (attached: ${m.imageName})` : m.question,
-        choices: m.choices?.length ? m.choices : ["Option A", "Option B", "Option C", "Option D"],
-        correctIndex: m.correctIndex ?? 0,
+  useEffect(() => {
+    let cancelled = false;
+    if (!signedIn) {
+      setMistakes(seededMistakes);
+      return;
+    }
+    void listMistakes()
+      .then((rows) => {
+        if (!cancelled) setMistakes(rows.map(fromDb));
+      })
+      .catch(() => {
+        /* keep whatever is on screen */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [signedIn]);
 
-        hints: [
-          "Restate the question in your own words — what exactly is being asked?",
-          "Which formula or concept connects the given values to the unknown?",
-          "Work through the substitution one step at a time and check your units.",
-        ],
-        solution:
-          "Walk through your own reasoning and compare it with your note about why you got it wrong.",
-        notes: m.notes,
-        addedAt: new Date().toISOString().slice(0, 10),
-        attempts: 0,
-        lastPracticedAt: null,
-      },
-      ...prev,
-    ]);
-  }, []);
+  const addMistakes = useCallback(
+    async (items: NewMistake[]) => {
+      if (!items.length) return;
+      if (!signedIn) {
+        setMistakes((prev) => [...items.map(localMistake), ...prev]);
+        return;
+      }
+      const saved = await saveMistakes({ data: { items: items.map(toDb) } });
+      setMistakes((prev) => [...saved.map(fromDb), ...prev]);
+    },
+    [signedIn],
+  );
 
-  const toggleMastery = useCallback((id: string) => {
-    setMistakes((prev) =>
-      prev.map((m) =>
-        m.id === id ? { ...m, mastery: m.mastery === "Mastered" ? "Unresolved" : "Mastered" } : m,
-      ),
-    );
-  }, []);
+  const addMistake = useCallback(
+    (m: NewMistake) => {
+      void addMistakes([m]);
+    },
+    [addMistakes],
+  );
 
-  const registerAttempt = useCallback((id: string) => {
-    setMistakes((prev) =>
-      prev.map((m) =>
-        m.id === id ? { ...m, attempts: m.attempts + 1, lastPracticedAt: iso(new Date()) } : m,
-      ),
-    );
-  }, []);
+  const toggleMastery = useCallback(
+    (id: string) => {
+      let next = "Unresolved";
+      setMistakes((prev) =>
+        prev.map((m) => {
+          if (m.id !== id) return m;
+          next = m.mastery === "Mastered" ? "Unresolved" : "Mastered";
+          return { ...m, mastery: next as Mistake["mastery"] };
+        }),
+      );
+      if (signedIn) void updateMistake({ data: { id, mastery: next } }).catch(() => {});
+    },
+    [signedIn],
+  );
+
+  const registerAttempt = useCallback(
+    (id: string) => {
+      let attempts = 0;
+      setMistakes((prev) =>
+        prev.map((m) => {
+          if (m.id !== id) return m;
+          attempts = m.attempts + 1;
+          return { ...m, attempts, lastPracticedAt: iso(new Date()) };
+        }),
+      );
+      if (signedIn)
+        void updateMistake({
+          data: { id, attempts, lastPracticedAt: iso(new Date()) },
+        }).catch(() => {});
+    },
+    [signedIn],
+  );
 
   const awardXp = useCallback((amount: number) => setXp((v) => v + amount), []);
 
@@ -146,7 +258,9 @@ export function QuizProvider({ children }: { children: ReactNode }) {
       pendingFirstPractice,
       weekReviewDue,
       dueIds,
+      signedIn,
       addMistake,
+      addMistakes,
       toggleMastery,
       awardXp,
       registerAttempt,
@@ -158,7 +272,9 @@ export function QuizProvider({ children }: { children: ReactNode }) {
       pendingFirstPractice,
       weekReviewDue,
       dueIds,
+      signedIn,
       addMistake,
+      addMistakes,
       toggleMastery,
       awardXp,
       registerAttempt,
@@ -167,6 +283,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
 
   return <QuizContext.Provider value={value}>{children}</QuizContext.Provider>;
 }
+
 
 export function useQuiz() {
   const ctx = useContext(QuizContext);

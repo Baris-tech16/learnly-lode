@@ -10,8 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CommunityRouteImport } from './routes/community'
-import { Route as ExamRouteImport } from './routes/exam'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as PracticeRouteImport } from './routes/practice'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -22,14 +22,14 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CommunityRoute = CommunityRouteImport.update({
   id: '/community',
   path: '/community',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExamRoute = ExamRouteImport.update({
-  id: '/exam',
-  path: '/exam',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeaderboardRoute = LeaderboardRouteImport.update({
@@ -55,8 +55,8 @@ const VaultRoute = VaultRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
-  '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
   '/practice': typeof PracticeRoute
   '/profile': typeof ProfileRoute
@@ -64,8 +64,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
-  '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
   '/practice': typeof PracticeRoute
   '/profile': typeof ProfileRoute
@@ -74,8 +74,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
-  '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
   '/practice': typeof PracticeRoute
   '/profile': typeof ProfileRoute
@@ -85,8 +85,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/community'
-    | '/exam'
     | '/leaderboard'
     | '/practice'
     | '/profile'
@@ -94,8 +94,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/community'
-    | '/exam'
     | '/leaderboard'
     | '/practice'
     | '/profile'
@@ -103,8 +103,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/auth'
     | '/community'
-    | '/exam'
     | '/leaderboard'
     | '/practice'
     | '/profile'
@@ -113,8 +113,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   CommunityRoute: typeof CommunityRoute
-  ExamRoute: typeof ExamRoute
   LeaderboardRoute: typeof LeaderboardRoute
   PracticeRoute: typeof PracticeRoute
   ProfileRoute: typeof ProfileRoute
@@ -130,18 +130,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/community': {
       id: '/community'
       path: '/community'
       fullPath: '/community'
       preLoaderRoute: typeof CommunityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/exam': {
-      id: '/exam'
-      path: '/exam'
-      fullPath: '/exam'
-      preLoaderRoute: typeof ExamRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leaderboard': {
@@ -177,8 +177,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   CommunityRoute: CommunityRoute,
-  ExamRoute: ExamRoute,
   LeaderboardRoute: LeaderboardRoute,
   PracticeRoute: PracticeRoute,
   ProfileRoute: ProfileRoute,
