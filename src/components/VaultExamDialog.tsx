@@ -515,9 +515,8 @@ export function VaultExamDialog({ trigger }: { trigger: ReactNode }) {
               <Button variant="outline" onClick={() => setConfirmOpen(false)}>
                 {t("exam.cancel")}
               </Button>
-              <Button onClick={() => finish(false)}>
-                {savedCount === 0 ? t("exam.confirmFinish") : <Loader2 className="h-4 w-4 animate-spin" />}
-              </Button>
+              <Button onClick={() => finish(false)}>{t("exam.confirmFinish")}</Button>
+
             </DialogFooter>
           </DialogContent>
         </Dialog>
